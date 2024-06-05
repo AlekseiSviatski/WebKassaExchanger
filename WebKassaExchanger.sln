@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebKassaExchanger", "WebKassaExchanger.csproj", "{474C1263-D842-45E8-BA42-B5F13B7EBFEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebKassa", "WebKassa\WebKassa.csproj", "{E086D4D6-E1CE-4383-A41F-072B432E8C9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{474C1263-D842-45E8-BA42-B5F13B7EBFEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{474C1263-D842-45E8-BA42-B5F13B7EBFEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{474C1263-D842-45E8-BA42-B5F13B7EBFEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E086D4D6-E1CE-4383-A41F-072B432E8C9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E086D4D6-E1CE-4383-A41F-072B432E8C9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E086D4D6-E1CE-4383-A41F-072B432E8C9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E086D4D6-E1CE-4383-A41F-072B432E8C9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
