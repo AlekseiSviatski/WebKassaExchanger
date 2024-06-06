@@ -59,6 +59,11 @@ namespace WebKassa
             return result;
         }
 
+        public async Task CreateImportFile(string path)
+        {
+            (await _db.GetSingleServices()).CreateImportFile(path);
+        }
+
         #endregion
     }
 

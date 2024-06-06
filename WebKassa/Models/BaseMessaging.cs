@@ -71,7 +71,7 @@ namespace WebKassa.Models
                     {
                         var exception = JsonSerializer.Deserialize<WebKassaException>(responseData);
                         exception.StatusCode = (int)response.StatusCode;
-                        throw new Exception($"{exception?.Exception.ErrorMessageForClient}, StatusCode: {exception?.StatusCode}");
+                        throw new Exception($"{exception?.Exception?.ErrorMessageForClient}, StatusCode: {exception?.StatusCode}");
                     }
                     throw new Exception($"WebKassa exception. StatusCode: {(int)response.StatusCode}");
                 }
