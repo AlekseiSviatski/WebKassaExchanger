@@ -19,4 +19,14 @@
     <None Remove=".gitignore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="WebKassa\WebKassa.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="sys.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
