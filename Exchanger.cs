@@ -60,7 +60,7 @@ namespace WebKassaExchanger
                 var configTime = TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>());
                 if (
                     (timeOfDay >= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()) &
-                    (timeOfDay <= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()).Add(TimeSpan.FromSeconds(1)))))
+                    (timeOfDay < TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()).Add(TimeSpan.FromSeconds(1)))))
                 {
                     await _webKassa.ImportFromAccountAsync(
                         DateTime.Now,
