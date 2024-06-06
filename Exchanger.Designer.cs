@@ -28,12 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            getSalesBtn = new Button();
+            SuspendLayout();
+            // 
+            // getSalesBtn
+            // 
+            getSalesBtn.Location = new Point(78, 152);
+            getSalesBtn.Name = "getSalesBtn";
+            getSalesBtn.Size = new Size(75, 23);
+            getSalesBtn.TabIndex = 0;
+            getSalesBtn.Text = "Тык!";
+            getSalesBtn.UseVisualStyleBackColor = true;
+            getSalesBtn.Click += getSalesBtn_ClickAsync;
+            // 
+            // Exchanger
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(230, 209);
+            Controls.Add(getSalesBtn);
+            Name = "Exchanger";
+            Text = "Form1";
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private Button getSalesBtn;
     }
 }

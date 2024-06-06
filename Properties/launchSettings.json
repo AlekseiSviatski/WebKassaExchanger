@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "WebKassaExchanger": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+      "sqlDebugging": false
+    }
+  }
+}

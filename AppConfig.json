@@ -1,0 +1,12 @@
+{
+  "Account" : {
+    "BaseUri" : "https://cabinet.test.rdigital.by",
+    "APIKey" : "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4MjA5MkE2NS1DNzgyLTRFMEYtOTM1RC1GQ0NDMzk1QUI5QjIiLCJleHAiOjE3MjUzNzU2NTV9.SX3C9Y4bJgYQDeKgkQXNWNYWwRnNhpMzqXTGPrtGgf0drKCyP4dw6i1Y-7ruJE1-cD6jjbLUkCZyHke4FZUg-Q",
+    "CashRegisterId" : 171090436
+  },
+  "PPS" : {
+    "CashboxID" : 1,
+    "EmployeeID": 1,
+    "CashierID": 1
+  }
+}
