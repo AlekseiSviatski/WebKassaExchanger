@@ -1,13 +1,13 @@
 {
   "Account" : {
-    "BaseUri" : "https://cabinet.test.rdigital.by",
-    "APIKey" : "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4MjA5MkE2NS1DNzgyLTRFMEYtOTM1RC1GQ0NDMzk1QUI5QjIiLCJleHAiOjE3MjUzNzU2NTV9.SX3C9Y4bJgYQDeKgkQXNWNYWwRnNhpMzqXTGPrtGgf0drKCyP4dw6i1Y-7ruJE1-cD6jjbLUkCZyHke4FZUg-Q",
-    "CashRegisterId" : 171090436
+    "BaseUri" : "https://cabinet.test.rdigital.by", //Основной адрес
+    "APIKey" : "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4MjA5MkE2NS1DNzgyLTRFMEYtOTM1RC1GQ0NDMzk1QUI5QjIiLCJleHAiOjE3MjUzNzU2NTV9.SX3C9Y4bJgYQDeKgkQXNWNYWwRnNhpMzqXTGPrtGgf0drKCyP4dw6i1Y-7ruJE1-cD6jjbLUkCZyHke4FZUg-Q", // API ключ, формируемый в личном кабинете РАЗ В 3 МЕСЯЦА
+    "CashRegisterId" : 171090436 // id программной кассы (можно узнать в личном кабинете)
   },
-  "PPS" : {
-    "CashboxID" : 1,
-    "EmployeeID": 1,
-    "CashierID": 1,
-    "AutoimportTime": "23:59:31"
+  "PPS": {
+    "CashboxID": 1, // id кассы в ППС
+    "EmployeeID": 1, // id сотрудника для PaymentHistory
+    "CashierID": 1, // id кассира
+    "AutoimportTime": "23:59:31" // время автоимпорта 
   }
 }
