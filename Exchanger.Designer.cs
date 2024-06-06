@@ -1,6 +1,6 @@
 ﻿namespace WebKassaExchanger
 {
-    partial class Form1
+    partial class Exchanger
     {
         /// <summary>
         ///  Required designer variable.

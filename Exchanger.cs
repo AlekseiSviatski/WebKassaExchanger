@@ -1,8 +1,8 @@
 namespace WebKassaExchanger
 {
-    public partial class Form1 : Form
+    public partial class Exchanger : Form
     {
-        public Form1()
+        public Exchanger()
         {
             InitializeComponent();
         }
