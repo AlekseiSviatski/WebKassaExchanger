@@ -64,6 +64,20 @@ namespace WebKassa
             (await _db.GetSingleServices()).CreateImportFile(path);
         }
 
+        public async Task ImportFromAccountAsync(DateTime date, int cashRegisterId)
+        {
+            try
+            {
+                var sales = (await GetSalesAsync(date, cashRegisterId)).ToList();
+                var dbSingleServices = (await _db.GetSingleServices()).ToList();
+                await UpdateDB(sales, dbSingleServices);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         #endregion
     }
 
@@ -88,7 +102,11 @@ namespace WebKassa
 
         public static void CreateImportFile(this ICollection<SingleServiceDB> singleServices, string path)
         {
-            using StreamWriter writer = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now.ToShortDateString()}_ToWebKassa.csv"), FileMode.Create), encoding: Encoding.GetEncoding(1251));
+            using StreamWriter writer = new StreamWriter(File.Open(
+                Path.Combine(path, @$"{DateTime.Now.ToString("dd-MM-yyyy")}_ToWebKassa.csv"), 
+                FileMode.Create), 
+                encoding: Encoding.GetEncoding(1251));
+            
             string firstline = "\"Код (артикул)\";Наименование;Ед. измерения;Себестоимость;Цена;Количество;Категория;ТоваруслугаСертификат;Штрих-код;Использование;Код ставки НДС;Процент скидки;Секция";
 
             writer.WriteLine(firstline);

@@ -12,6 +12,15 @@ namespace WebKassaExchanger
         {
             _webKassa = webKassa;
             InitializeComponent();
+            switch(timer.Enabled)
+            {
+                case true:
+                    autoImportBtn.Text = "Запретить автоимпорт";
+                    break;
+                case false:
+                    autoImportBtn.Text = "Разрешить автоимпорт";
+                    break;
+            }
         }
 
         private async void getSalesBtn_ClickAsync(object sender, EventArgs e)
@@ -19,9 +28,7 @@ namespace WebKassaExchanger
             this.Enabled = false;
             try
             {
-                var sales = (await _webKassa.GetSalesAsync(
-                new DateTime(2024, 6, 4),
-                Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>())).ToList();
+                await _webKassa.ImportFromAccountAsync(dateTimePicker1.Value, Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>());
                 MessageBox.Show("Done!");
                 this.Enabled = true;
             }
@@ -32,13 +39,22 @@ namespace WebKassaExchanger
             }
         }
 
-        private void timer_Tick(object sender, EventArgs e)
+        private async void timer_Tick(object sender, EventArgs e)
         {
-            var timeOfDay = DateTime.Now.TimeOfDay;
-            var configTime = TimeSpan.Parse("12:02:00");
-            if ((timeOfDay >= TimeSpan.Parse("12:11:30")) & (timeOfDay <= TimeSpan.Parse("12:11:31")))
+            try
             {
-                MessageBox.Show("Ты лох");
+                var timeOfDay = TimeSpan.FromSeconds(Math.Round(DateTime.Now.TimeOfDay.TotalSeconds));
+                var configTime = TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>());
+                if (
+                    (timeOfDay >= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()) &
+                    (timeOfDay <= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()).Add(TimeSpan.FromSeconds(1)))))
+                {
+                    await _webKassa.ImportFromAccountAsync(DateTime.Now, Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>());
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка во время автовыгрузки, {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -47,23 +63,36 @@ namespace WebKassaExchanger
             if (timer.Enabled)
             {
                 timer.Enabled = false;
-                button1.Text = "Enable";
+                importBtn.Enabled = true;
+                autoImportBtn.Text = "Разрешить автоимпорт";
+                Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Value = $"{TimeSpan.FromSeconds(Math.Round(dateTimePicker2.Value.TimeOfDay.TotalSeconds))}";
             }
             else
             {
                 timer.Enabled = true;
-                button1.Text = "Disable";
+                importBtn.Enabled = false;
+                autoImportBtn.Text = "Запретить автоимпорт";
+                Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Value = $"{TimeSpan.FromSeconds(Math.Round(dateTimePicker2.Value.TimeOfDay.TotalSeconds))}";
             }
         }
 
         private async void exportBtn_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog fd = new FolderBrowserDialog();
-            if(fd.ShowDialog() == DialogResult.OK)
+            try
             {
-                _filePath = fd.SelectedPath;
+                FolderBrowserDialog fd = new FolderBrowserDialog();
+                if (fd.ShowDialog() == DialogResult.OK)
+                {
+                    _filePath = fd.SelectedPath;
+                }
+                await _webKassa.CreateImportFile(_filePath);
+                MessageBox.Show("Success!");
             }
-            await _webKassa.CreateImportFile(_filePath);
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
         }
     }
 }
