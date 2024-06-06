@@ -25,17 +25,25 @@ namespace WebKassaExchanger
 
         private async void getSalesBtn_ClickAsync(object sender, EventArgs e)
         {
-            this.Enabled = false;
-            try
+            var res = MessageBox.Show(
+                $"Вы уверены, что хотите сделать импорт продаж за {dateTimePicker1.Value.Date.ToString("dd.MM.yyyy")} число?",
+                "Attention",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Warning);
+            if (res == DialogResult.OK)
             {
-                await _webKassa.ImportFromAccountAsync(dateTimePicker1.Value, Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>());
-                MessageBox.Show("Done!");
-                this.Enabled = true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Enabled = true;
+                this.Enabled = false;
+                try
+                {
+                    await _webKassa.ImportFromAccountAsync(dateTimePicker1.Value, Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>());
+                    MessageBox.Show("Done!");
+                    this.Enabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    this.Enabled = true;
+                }
             }
         }
 
