@@ -35,7 +35,12 @@ namespace WebKassaExchanger
                 this.Enabled = false;
                 try
                 {
-                    await _webKassa.ImportFromAccountAsync(dateTimePicker1.Value, Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>());
+                    await _webKassa.ImportFromAccountAsync(
+                        dateTimePicker1.Value, 
+                        Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>(),
+                        Program.Configuration.GetSection("PPS").GetSection("CashierID").Get<int>(),
+                        Program.Configuration.GetSection("PPS").GetSection("CashboxID").Get<int>(),
+                        Program.Configuration.GetSection("PPS").GetSection("EmployeeID").Get<int>());
                     MessageBox.Show("Done!");
                     this.Enabled = true;
                 }
@@ -57,7 +62,12 @@ namespace WebKassaExchanger
                     (timeOfDay >= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()) &
                     (timeOfDay <= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()).Add(TimeSpan.FromSeconds(1)))))
                 {
-                    await _webKassa.ImportFromAccountAsync(DateTime.Now, Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>());
+                    await _webKassa.ImportFromAccountAsync(
+                        DateTime.Now,
+                        Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>(),
+                        Program.Configuration.GetSection("PPS").GetSection("CashierID").Get<int>(),
+                        Program.Configuration.GetSection("PPS").GetSection("CashboxID").Get<int>(),
+                        Program.Configuration.GetSection("PPS").GetSection("EmployeeID").Get<int>());
                 }
             }
             catch (Exception ex)

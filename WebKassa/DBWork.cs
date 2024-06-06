@@ -35,7 +35,7 @@ namespace WebKassa
             return singleServiceList;
         }
 
-        public async Task<bool> UpdateSingleServicesSales(ICollection<SingleServiceUpdateModel> sales)
+        public async Task<bool> UpdateSingleServicesSales(ICollection<SingleServiceUpdateModel> sales, int? idCashier, int? idCashbox, int? idEmployee)
         {
             //TODO: реализовать транзакцию добавления продаж в БД. Сервис возвращает сводное кол-во продаж (ну вроде сводное, надо чекать)
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -66,8 +66,8 @@ namespace WebKassa
                                 {
                                     Price = s.CashPrice,
                                     TotalModey = s.CashPrice,
-                                    IdCashier = 1, //из конфига
-                                    CashboxId = 1 // из конфига
+                                    IdCashier = idCashier, //из конфига
+                                    CashboxId = idCashbox // из конфига
                                 });
                             }
 
@@ -82,8 +82,8 @@ namespace WebKassa
                                 {
                                     CashboxPaymentTypeId = 3,
                                     Price = s.CardPrice,
-                                    IdCashier = 1, // из конфига
-                                    CashboxId = 1 // из конфига
+                                    IdCashier = idCashier, // из конфига
+                                    CashboxId = idCashbox // из конфига
                                 });
                             }
 
@@ -99,14 +99,14 @@ namespace WebKassa
                                         CheckListID = chekListId,
                                         CardPaymentId = null,
                                         CashlessPaymentID = null,
-                                        CashboxID = 1, // из конфига
+                                        CashboxID = idCashbox, // из конфига
                                         SingleServiceUsedID = ssuId,
                                         Count = (s.TotalPrice / s.CashPrice) * s.Count,
                                         PaymentPrice = s.CashPrice,
                                         Price = s.Price,
                                         TotalPrice = s.TotalPrice,
-                                        EmployeeID = 1, // из конфига
-                                        CashierID = 1, // из конфига
+                                        EmployeeID = idEmployee, // из конфига
+                                        CashierID = idCashier, // из конфига
                                     });
                             }
 
@@ -118,14 +118,14 @@ namespace WebKassa
                                         CheckListID = null,
                                         CardPaymentId = cashboxPaymentId,
                                         CashlessPaymentID = null,
-                                        CashboxID = 1, // из конфига
+                                        CashboxID = idCashbox, // из конфига
                                         SingleServiceUsedID = ssuId,
                                         Count = (s.TotalPrice / s.CardPrice) * s.Count,
                                         PaymentPrice = s.CardPrice,
                                         Price = s.Price,
                                         TotalPrice = s.TotalPrice,
-                                        EmployeeID = 1, // из конфига
-                                        CashierID = 1, // из конфига
+                                        EmployeeID = idEmployee, // из конфига
+                                        CashierID = idCashier, // из конфига
                                     });
                             }
 

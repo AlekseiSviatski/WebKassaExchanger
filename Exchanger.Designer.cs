@@ -53,15 +53,15 @@
             // 
             // panel1
             // 
-            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel1.Controls.Add(dateTimePicker2);
             panel1.Controls.Add(dateTimePicker1);
             panel1.Controls.Add(autoImportBtn);
             panel1.Controls.Add(exportBtn);
             panel1.Controls.Add(importBtn);
+            panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(324, 228);
+            panel1.Size = new Size(324, 128);
             panel1.TabIndex = 1;
             // 
             // dateTimePicker2
@@ -99,7 +99,7 @@
             // exportBtn
             // 
             exportBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            exportBtn.Location = new Point(50, 165);
+            exportBtn.Location = new Point(56, 68);
             exportBtn.Name = "exportBtn";
             exportBtn.Size = new Size(220, 51);
             exportBtn.TabIndex = 1;
@@ -116,7 +116,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(324, 228);
+            ClientSize = new Size(324, 128);
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");

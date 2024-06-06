@@ -35,10 +35,12 @@ namespace WebKassa
             return result;
         }
 
-        public async Task<ICollection<Good>> GetGoodListAsync(WarehouseRequestOptions options) =>
-            await SendRequestAsync<List<Good>, WarehouseRequestOptions>(HttpMethod.Post, options, "api/warehouse/list");
-
-        public async Task<bool> UpdateDB(ICollection<Sale> sales, ICollection<SingleServiceDB> dbSingleServices)
+        public async Task<bool> UpdateDB(
+            ICollection<Sale> sales, 
+            ICollection<SingleServiceDB> dbSingleServices,
+            int? idCashier,
+            int? idCashbox,
+            int? idEmployee)
         {
             var updateList = dbSingleServices.Join(sales,
                 x => x.Code,
@@ -55,7 +57,7 @@ namespace WebKassa
                     CashPrice = b.TotalCash,
                     CardPrice = b.TotalNoCash
                 }).ToList();
-            var result = await _db.UpdateSingleServicesSales(updateList);
+            var result = await _db.UpdateSingleServicesSales(updateList, idCashier, idCashbox, idEmployee);
             return result;
         }
 
@@ -64,13 +66,13 @@ namespace WebKassa
             (await _db.GetSingleServices()).CreateImportFile(path);
         }
 
-        public async Task ImportFromAccountAsync(DateTime date, int cashRegisterId)
+        public async Task ImportFromAccountAsync(DateTime date, int cashRegisterId, int? idCashier, int? idCashbox, int? idEmployee)
         {
             try
             {
                 var sales = (await GetSalesAsync(date, cashRegisterId)).ToList();
                 var dbSingleServices = (await _db.GetSingleServices()).ToList();
-                await UpdateDB(sales, dbSingleServices);
+                await UpdateDB(sales, dbSingleServices, idCashier, idCashbox, idEmployee);
             }
             catch
             {
