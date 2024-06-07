@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Collections.Specialized;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Web;
-using WebKassa.Models.Request;
 using WebKassa.Models.Response;
 
 namespace WebKassa.Models
@@ -75,8 +67,6 @@ namespace WebKassa.Models
                     }
                     throw new Exception($"WebKassa exception. StatusCode: {(int)response.StatusCode}");
                 }
-
-
             }
             catch (Exception ex)
             {

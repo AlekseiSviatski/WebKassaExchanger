@@ -12,7 +12,7 @@ namespace WebKassaExchanger
         {
             _webKassa = webKassa;
             InitializeComponent();
-            switch(timer.Enabled)
+            switch (timer.Enabled)
             {
                 case true:
                     autoImportBtn.Text = "Запретить автоимпорт";
@@ -36,7 +36,7 @@ namespace WebKassaExchanger
                 try
                 {
                     await _webKassa.ImportFromAccountAsync(
-                        dateTimePicker1.Value, 
+                        dateTimePicker1.Value,
                         Program.Configuration.GetSection("Account").GetSection("CashRegisterId").Get<int>(),
                         Program.Configuration.GetSection("PPS").GetSection("CashierID").Get<int>(),
                         Program.Configuration.GetSection("PPS").GetSection("CashboxID").Get<int>(),
@@ -57,7 +57,7 @@ namespace WebKassaExchanger
             try
             {
                 var timeOfDay = TimeSpan.FromSeconds(Math.Round(DateTime.Now.TimeOfDay.TotalSeconds));
-                var configTime = TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>());
+                
                 if (
                     (timeOfDay >= TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()) &
                     (timeOfDay < TimeSpan.Parse(Program.Configuration.GetSection("PPS").GetSection("AutoimportTime").Get<string>()).Add(TimeSpan.FromSeconds(1)))))
@@ -110,7 +110,7 @@ namespace WebKassaExchanger
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            
+
         }
     }
 }
