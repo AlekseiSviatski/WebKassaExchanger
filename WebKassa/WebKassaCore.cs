@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
 using WebKassa.Models;
 using WebKassa.Models.DBModel;
-using WebKassa.Models.Request;
 using WebKassa.Models.Response;
 
 namespace WebKassa
@@ -116,7 +111,7 @@ namespace WebKassa
             singleServices.ToList().ForEach(singleService =>
             {
                 string line = String.Format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12}",
-                    string.IsNullOrEmpty(singleService.Code) ? Guid.NewGuid() : singleService.Code,
+                    singleService.Code,
                     singleService.Name,
                     0, //ед. измерения 0 - шт, 1 - кг, 2 - л, 3 - м
                     singleService.PriceReceipt is null ? singleService.Price?.ToString("0.00", CultureInfo.InvariantCulture) : singleService.PriceReceipt.Value.ToString("0.00", CultureInfo.InvariantCulture),

@@ -1,13 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
 using WebKassa.Models.DBModel;
 
 namespace WebKassa
@@ -37,7 +31,6 @@ namespace WebKassa
 
         public async Task<bool> UpdateSingleServicesSales(ICollection<SingleServiceUpdateModel> sales, int? idCashier, int? idCashbox, int? idEmployee)
         {
-            //TODO: реализовать транзакцию добавления продаж в БД. Сервис возвращает сводное кол-во продаж (ну вроде сводное, надо чекать)
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
