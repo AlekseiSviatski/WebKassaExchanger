@@ -9,7 +9,7 @@
         public double? TotalPrice { get; set; }
         public double? DiscountPrice { get; set; } = 0;
         public int? EmployeeOrderId { get; set; } = 1;
-        public int? @pSingleServiceResevedId { get; set; } = null;
+        public int? SingleServiceResevedId { get; set; } = null;
         public bool? Paid { get; set; } = true;
         public double? PaidPrice { get; set; }
         public double? PaidCount { get; set; }

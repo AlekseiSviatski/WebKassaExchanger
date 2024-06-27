@@ -1,5 +1,10 @@
 using Microsoft.Extensions.Configuration;
+using NLog;
+using NLog.Targets;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using WebKassa;
+using WebKassa.Models;
 
 namespace WebKassaExchanger
 {
@@ -8,6 +13,7 @@ namespace WebKassaExchanger
         private static string _connectionString = string.Empty;
         public static string sysPath = String.Format(@"{0}\sys.ini", AppDomain.CurrentDomain.BaseDirectory);
         public static IConfiguration Configuration;
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -16,13 +22,28 @@ namespace WebKassaExchanger
         {
             var builder = new ConfigurationBuilder().AddJsonFile("AppConfig.json", optional: true, reloadOnChange: true);
             Configuration = builder.Build();
+
+            NLog.LogManager.Setup().LoadConfiguration(builder => 
+            {
+                var config = new NLog.Targets.FileTarget
+                {
+                    Name = "logfile",
+                    FileName = "${basedir}/Logs/${shortdate}_log.txt",
+                    Layout = "${longdate} ${level} ${callsite} ${message} \n${exception:format=message,stackTrace:maxInnerExceptionLevel=10:innerFormat=message,stackTrace}"
+                };
+
+                builder.ForLogger().FilterMinLevel(LogLevel.Error).WriteTo(config);
+            });
+
             GetConnectionStringFromUdl();
-            var lol = Configuration.GetSection("Account").GetSection("BaseUri").Value;
+
             ApplicationConfiguration.Initialize();
+
             Application.Run(new Exchanger(new WebKassaCore(
                 new Uri(Configuration.GetSection("Account").GetSection("BaseUri").Value),
                 Configuration.GetSection("Account").GetSection("APIKey").Value,
-                new DBWork(_connectionString))));
+                new DBWork(_connectionString),
+                Configuration.GetSection("PPS").Get<PPSConfig>())));
         }
 
         private static void GetConnectionStringFromUdl()

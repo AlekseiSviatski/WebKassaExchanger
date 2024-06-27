@@ -68,7 +68,7 @@ namespace WebKassa.Models
                     throw new Exception($"WebKassa exception. StatusCode: {(int)response.StatusCode}");
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
