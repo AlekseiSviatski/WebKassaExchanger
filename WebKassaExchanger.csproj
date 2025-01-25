@@ -5,9 +5,9 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
-    <ImplicitUsings>enable</ImplicitUsings>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ApplicationIcon>exchange.ico</ApplicationIcon>
+	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,465 +1,465 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
+using System.Threading.Tasks;
 using WebKassa.Models;
 using WebKassa.Models.DBModel;
 
 namespace WebKassa
 {
-    public class DBWork
-    {
-        private string _connectionString;
+	public class DBWork
+	{
+		private string _connectionString;
 
-        public DBWork(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+		public DBWork(string connectionString)
+		{
+			_connectionString = connectionString;
+		}
 
-        public async Task<ICollection<SingleServiceDB>> GetSingleServicesAsync(int? id = null)
-        {
-            using SqlConnection connection = new SqlConnection(_connectionString);
+		public async Task<ICollection<SingleServiceModel>> GetSingleServicesAsync(int? id = null)
+		{
+			using SqlConnection connection = new SqlConnection(_connectionString);
 
-            var parametres = new Dictionary<string, object>
-            {
-                {"@pID", id }
-            };
-            var queryParams = new DynamicParameters(parametres);
+			var parametres = new Dictionary<string, object?	>
+			{
+				{"@pID", id }
+			};
+			var queryParams = new DynamicParameters(parametres);
 
-            var singleServiceList = (await connection.QueryAsync<SingleServiceDB>("SingleServiceGet", queryParams, commandType: CommandType.StoredProcedure)).ToList();
-            
-            return singleServiceList;
-        }
+			var singleServiceList = (await connection.QueryAsync<SingleServiceModel>("SingleServiceGet", queryParams, commandType: CommandType.StoredProcedure)).ToList();
 
-        public async Task<ICollection<CashboxCashier>> GetCashiersAsync()
-        {
-            using SqlConnection connection = new SqlConnection(_connectionString);
+			return singleServiceList;
+		}
 
-            var result = (await connection.QueryAsync<CashboxCashier>(@"select
-	                                                                        t.FID,
-                                                                            t.FLOGIN,
-                                                                            t.FUSER,
-                                                                            t.PersonVisitorID
-                                                                        from Tlogins t
-                                                                        where 
-	                                                                        t.FACTIVE = 1", commandType: CommandType.Text)).ToList();
-            return result;
-        }
+		public async Task<ICollection<CashboxCashier>> GetCashiersAsync()
+		{
+			using SqlConnection connection = new SqlConnection(_connectionString);
 
-        public async Task UpdateSingleServicesSalesAsync(ICollection<SingleServiceUpdateModel> sales, int? idCashier, int? idCashbox, int? idEmployee)
-        {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-                
-                using DbTransaction transaction = await connection.BeginTransactionAsync();
-                
-                try
-                {
-                    sales.ToList()
-                        .ForEach(s =>
-                        {
-                            int? idOrder = null;
-                            int? ssuId = null;
-                            int? chekListId = null;
-                            int? cashboxPaymentId = null;
+			var result = (await connection.QueryAsync<CashboxCashier>(
+				@"select
+					t.FID,
+					t.FLOGIN,
+					t.FUSER,
+					t.PersonVisitorID
+				from Tlogins t
+				where 
+					t.FACTIVE = 1", commandType: CommandType.Text)).ToList();
+			
+			return result;
+		}
 
-                            #region SSU
+		public async Task UpdateSingleServicesSalesAsync(ICollection<SingleServiceUpdateModel> sales, int? idCashier, int? idCashbox, int? idEmployee)
+		{
+			using (SqlConnection connection = new SqlConnection(_connectionString))
+			{
+				await connection.OpenAsync();
 
-                            ssuId = SingleServiceUsedEdit(connection, transaction, s);
+				using DbTransaction transaction = await connection.BeginTransactionAsync();
 
-                            #endregion
+				try
+				{
+					sales.ToList()
+						.ForEach(s =>
+						{
+							int? ssuId = null;
+							int? chekListId = null;
+							int? cashboxPaymentId = null;
 
-                            #region CheckList
+							#region SSU
 
-                            if (s.CashPrice > 0)
-                            {
-                                chekListId = CashboxCheckListEdit(connection, transaction,
-                                new CashboxCheckListEditModel
-                                {
-                                    Price = s.CashPrice,
-                                    TotalModey = s.CashPrice,
-                                    IdCashier = idCashier, //из конфига
-                                    CashboxId = idCashbox // из конфига
-                                });
-                            }
+							ssuId = SingleServiceUsedEdit(connection, transaction, s);
 
-                            #endregion
+							#endregion
 
-                            #region CashboxPayment
+							#region CheckList
 
-                            if (s.CardPrice > 0)
-                            {
-                                cashboxPaymentId = CashboxPaymentEdit(connection, transaction,
-                                new CashboxPaymentEditModel
-                                {
-                                    CashboxPaymentTypeId = 3,
-                                    Price = s.CardPrice,
-                                    IdCashier = idCashier, // из конфига
-                                    CashboxId = idCashbox // из конфига
-                                });
-                            }
+							if (s.CashPrice > 0)
+							{
+								chekListId = CashboxCheckListEdit(connection, transaction,
+								new CashboxCheckListEditModel
+								{
+									Price = s.CashPrice,
+									TotalModey = s.CashPrice,
+									IdCashier = idCashier, //из конфига
+									CashboxId = idCashbox // из конфига
+								});
+							}
 
-                            #endregion
+							#endregion
 
-                            #region PaymentHistory
+							#region CashboxPayment
 
-                            if (chekListId != null)
-                            {
-                                PaymentHistoryEdit(connection, transaction,
-                                    new PaymentHistoryEditModel
-                                    {
-                                        CheckListID = chekListId,
-                                        CardPaymentId = null,
-                                        CashlessPaymentID = null,
-                                        CashboxID = idCashbox, // из конфига
-                                        SingleServiceUsedID = ssuId,
-                                        Count = (s.TotalPrice / s.CashPrice) * s.Count,
-                                        PaymentPrice = s.CashPrice,
-                                        Price = s.Price,
-                                        TotalPrice = s.TotalPrice,
-                                        EmployeeID = idEmployee, // из конфига
-                                        CashierID = idCashier, // из конфига
-                                    });
-                            }
+							if (s.CardPrice > 0)
+							{
+								cashboxPaymentId = CashboxPaymentEdit(connection, transaction,
+								new CashboxPaymentEditModel
+								{
+									CashboxPaymentTypeId = 3,
+									Price = s.CardPrice,
+									IdCashier = idCashier, // из конфига
+									CashboxId = idCashbox // из конфига
+								});
+							}
 
-                            if (cashboxPaymentId != null)
-                            {
-                                PaymentHistoryEdit(connection, transaction,
-                                    new PaymentHistoryEditModel
-                                    {
-                                        CheckListID = null,
-                                        CardPaymentId = cashboxPaymentId,
-                                        CashlessPaymentID = null,
-                                        CashboxID = idCashbox, // из конфига
-                                        SingleServiceUsedID = ssuId,
-                                        Count = (s.TotalPrice / s.CardPrice) * s.Count,
-                                        PaymentPrice = s.CardPrice,
-                                        Price = s.Price,
-                                        TotalPrice = s.TotalPrice,
-                                        EmployeeID = idEmployee, // из конфига
-                                        CashierID = idCashier, // из конфига
-                                    });
-                            }
+							#endregion
 
-                            #endregion
-                        });
+							#region PaymentHistory
 
-                    await transaction.CommitAsync();
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
-                    
-                    throw;
-                }
-                finally
-                {
-                    await connection.CloseAsync();
-                }
-            }
-        }
+							if (chekListId != null)
+							{
+								PaymentHistoryEdit(connection, transaction,
+									new PaymentHistoryEditModel
+									{
+										CheckListID = chekListId,
+										CardPaymentId = null,
+										CashlessPaymentID = null,
+										CashboxID = idCashbox, // из конфига
+										SingleServiceUsedID = ssuId,
+										Count = (s.TotalPrice / s.CashPrice) * s.Count,
+										PaymentPrice = s.CashPrice,
+										Price = s.Price,
+										TotalPrice = s.TotalPrice,
+										EmployeeID = idEmployee, // из конфига
+										CashierID = idCashier, // из конфига
+									});
+							}
 
-        public async Task UpdateSingleServicesSalesAsync(
-            ICollection<SalesToImportModel> salesToImport, 
-            ICollection<SingleServiceDB> dbSingleServices,
-            int? idCashier, 
-            int? idCashbox, 
-            int? idEmployee)
-        {
-            
+							if (cashboxPaymentId != null)
+							{
+								PaymentHistoryEdit(connection, transaction,
+									new PaymentHistoryEditModel
+									{
+										CheckListID = null,
+										CardPaymentId = cashboxPaymentId,
+										CashlessPaymentID = null,
+										CashboxID = idCashbox, // из конфига
+										SingleServiceUsedID = ssuId,
+										Count = (s.TotalPrice / s.CardPrice) * s.Count,
+										PaymentPrice = s.CardPrice,
+										Price = s.Price,
+										TotalPrice = s.TotalPrice,
+										EmployeeID = idEmployee, // из конфига
+										CashierID = idCashier, // из конфига
+									});
+							}
 
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
+							#endregion
+						});
 
-                using DbTransaction transaction = await connection.BeginTransactionAsync();
+					await transaction.CommitAsync();
+				}
+				catch
+				{
+					await transaction.RollbackAsync();
 
-                try
-                {
-                    foreach(var importSale in salesToImport)
-                    {
-                        List<SingleServiceUpdateModel> sales = new List<SingleServiceUpdateModel>();
-                        int? idOrder = CashboxOrderEdit(transaction, new CashboxOrderEditModel());
+					throw;
+				}
+				finally
+				{
+					await connection.CloseAsync();
+				}
+			}
+		}
 
-                        importSale?.SaledGoods?.ForEach(s =>
-                        {
-                            sales.Add(
-                                new SingleServiceUpdateModel
-                                {
-                                    IdOrder = idOrder?? default,
-                                    SingleServiceId = dbSingleServices?.FirstOrDefault(x => x.Code == s.Article)?.ID,
-                                    Count = s.Quantity,
-                                    Price = s.SellPrice,
-                                    TotalPrice = s.Sum,
-                                    DiscountPrice = s.Discount,
-                                    PaidPrice = s.Sum,
-                                    PaidCount = s.Quantity,
-                                    TerminalId = null,
-                                    CashPrice = (importSale.TotalSumCash != null) & (importSale.TotalSumCash > 0) ? s.Sum : null,
-                                    CardPrice = (importSale.TotalSumNoCash != null) & (importSale.TotalSumNoCash > 0) ? s.Sum : null,
-                                });
-                        });
+		public async Task UpdateSingleServicesSalesAsync(
+			ICollection<SalesToImportModel> salesToImport,
+			ICollection<SingleServiceModel> dbSingleServices,
+			int? idCashier,
+			int? idCashbox,
+			int? idEmployee
+		)
+		{
+			using (SqlConnection connection = new SqlConnection(_connectionString))
+			{
+				await connection.OpenAsync();
 
-                        sales.ToList()
-                        .ForEach(s =>
-                        {
-                            int? ssuId = null;
-                            int? chekListId = null;
-                            int? cashboxPaymentId = null;
+				using DbTransaction transaction = await connection.BeginTransactionAsync();
 
-                            #region SSU
+				try
+				{
+					foreach (var importSale in salesToImport)
+					{
+						List<SingleServiceUpdateModel> sales = new List<SingleServiceUpdateModel>();
+						int? idOrder = CashboxOrderEdit(transaction, new CashboxOrderEditModel());
 
-                            ssuId = SingleServiceUsedEdit(connection, transaction, s);
+						importSale?.SaledGoods?.ForEach(s =>
+						{
+							sales.Add(
+								new SingleServiceUpdateModel
+								{
+									IdOrder = idOrder ?? default,
+									SingleServiceId = dbSingleServices?.FirstOrDefault(x => x.Code == s.Article)?.ID,
+									Count = s.Quantity,
+									Price = s.SellPrice,
+									TotalPrice = s.Sum,
+									DiscountPrice = s.Discount,
+									PaidPrice = s.Sum,
+									PaidCount = s.Quantity,
+									TerminalId = null,
+									CashPrice = (importSale.TotalSumCash != null) & (importSale.TotalSumCash > 0) ? s.Sum : null,
+									CardPrice = (importSale.TotalSumNoCash != null) & (importSale.TotalSumNoCash > 0) ? s.Sum : null,
+								});
+						});
 
-                            #endregion
+						sales.ToList()
+						.ForEach(s =>
+						{
+							int? ssuId = null;
+							int? chekListId = null;
+							int? cashboxPaymentId = null;
 
-                            #region CheckList
+							#region SSU
 
-                            if (s.CashPrice > 0)
-                            {
-                                chekListId = CashboxCheckListEdit(connection, transaction,
-                                new CashboxCheckListEditModel
-                                {
-                                    IdOrder = s.IdOrder,
-                                    Price = s.CashPrice,
-                                    TotalModey = s.CashPrice,
-                                    IdCashier = idCashier, //из конфига
-                                    CashboxId = idCashbox // из конфига
-                                });
-                            }
+							ssuId = SingleServiceUsedEdit(connection, transaction, s);
 
-                            #endregion
+							#endregion
 
-                            #region CashboxPayment
+							#region CheckList
 
-                            if (s.CardPrice > 0)
-                            {
-                                cashboxPaymentId = CashboxPaymentEdit(connection, transaction,
-                                new CashboxPaymentEditModel
-                                {
-                                    IdOrder= s.IdOrder,
-                                    CashboxPaymentTypeId = 3,
-                                    Price = s.CardPrice,
-                                    IdCashier = idCashier, // из конфига
-                                    CashboxId = idCashbox // из конфига
-                                });
-                            }
+							if (s.CashPrice > 0)
+							{
+								chekListId = CashboxCheckListEdit(connection, transaction,
+								new CashboxCheckListEditModel
+								{
+									IdOrder = s.IdOrder,
+									Price = s.CashPrice,
+									TotalModey = s.CashPrice,
+									IdCashier = idCashier, //из конфига
+									CashboxId = idCashbox // из конфига
+								});
+							}
 
-                            #endregion
+							#endregion
 
-                            #region PaymentHistory
+							#region CashboxPayment
 
-                            if (chekListId != null)
-                            {
-                                PaymentHistoryEdit(connection, transaction,
-                                    new PaymentHistoryEditModel
-                                    {
-                                        CashboxOrderID = s.IdOrder,
-                                        CheckListID = chekListId,
-                                        CardPaymentId = null,
-                                        CashlessPaymentID = null,
-                                        CashboxID = idCashbox, // из конфига
-                                        SingleServiceUsedID = ssuId,
-                                        Count = (s.TotalPrice / s.CashPrice) * s.Count,
-                                        PaymentPrice = s.CashPrice,
-                                        Price = s.Price,
-                                        TotalPrice = s.TotalPrice,
-                                        EmployeeID = idEmployee, // из конфига
-                                        CashierID = idCashier, // из конфига
-                                    });
-                            }
+							if (s.CardPrice > 0)
+							{
+								cashboxPaymentId = CashboxPaymentEdit(connection, transaction,
+								new CashboxPaymentEditModel
+								{
+									IdOrder = s.IdOrder,
+									CashboxPaymentTypeId = 3,
+									Price = s.CardPrice,
+									IdCashier = idCashier, // из конфига
+									CashboxId = idCashbox // из конфига
+								});
+							}
 
-                            if (cashboxPaymentId != null)
-                            {
-                                PaymentHistoryEdit(connection, transaction,
-                                    new PaymentHistoryEditModel
-                                    {
-                                        CashboxOrderID= s.IdOrder,
-                                        CheckListID = null,
-                                        CardPaymentId = cashboxPaymentId,
-                                        CashlessPaymentID = null,
-                                        CashboxID = idCashbox, // из конфига
-                                        SingleServiceUsedID = ssuId,
-                                        Count = (s.TotalPrice / s.CardPrice) * s.Count,
-                                        PaymentPrice = s.CardPrice,
-                                        Price = s.Price,
-                                        TotalPrice = s.TotalPrice,
-                                        EmployeeID = idEmployee, // из конфига
-                                        CashierID = idCashier, // из конфига
-                                    });
-                            }
+							#endregion
 
-                            #endregion
-                        });
-                    }
+							#region PaymentHistory
 
+							if (chekListId != null)
+							{
+								PaymentHistoryEdit(connection, transaction,
+									new PaymentHistoryEditModel
+									{
+										CashboxOrderID = s.IdOrder,
+										CheckListID = chekListId,
+										CardPaymentId = null,
+										CashlessPaymentID = null,
+										CashboxID = idCashbox, // из конфига
+										SingleServiceUsedID = ssuId,
+										Count = (s.TotalPrice / s.CashPrice) * s.Count,
+										PaymentPrice = s.CashPrice,
+										Price = s.Price,
+										TotalPrice = s.TotalPrice,
+										EmployeeID = idEmployee, // из конфига
+										CashierID = idCashier, // из конфига
+									});
+							}
 
-                    
+							if (cashboxPaymentId != null)
+							{
+								PaymentHistoryEdit(connection, transaction,
+									new PaymentHistoryEditModel
+									{
+										CashboxOrderID = s.IdOrder,
+										CheckListID = null,
+										CardPaymentId = cashboxPaymentId,
+										CashlessPaymentID = null,
+										CashboxID = idCashbox, // из конфига
+										SingleServiceUsedID = ssuId,
+										Count = (s.TotalPrice / s.CardPrice) * s.Count,
+										PaymentPrice = s.CardPrice,
+										Price = s.Price,
+										TotalPrice = s.TotalPrice,
+										EmployeeID = idEmployee, // из конфига
+										CashierID = idCashier, // из конфига
+									});
+							}
 
-                    await transaction.CommitAsync();
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
+							#endregion
 
-                    throw;
-                }
-                finally
-                {
-                    await connection.CloseAsync();
-                }
-            }
-        }
+						});
+					}
 
-        private int? SingleServiceUsedEdit(SqlConnection connection, DbTransaction transaction, SingleServiceUpdateModel s)
-        {
-            try
-            {
-                var parametres = new Dictionary<string, object>
-                            {
-                                {"@pClientOrderID", s.IdOrder },
-                                {"@pSingleServiceID", s.SingleServiceId },
-                                {"@pCount", s.Count },
-                                {"@pPrice", s.Price },
-                                {"@pTotalPrice", s.TotalPrice },
-                                {"@pDiscountPrice", s.DiscountPrice },
-                                {"@pEmployeeOrderID", s.EmployeeOrderId },
-                                {"@pSingleServiceResevedID", s.SingleServiceResevedId },
-                                {"@pPaid", s.Paid },
-                                {"@pPaidPrice", s.PaidPrice },
-                                {"@pPaidCount", s.PaidCount },
-                                {"@pTerminalID", s.TerminalId },
-                                {"@pSingleServiceQueueID", null },
-                            };
+					await transaction.CommitAsync();
+				}
+				catch
+				{
+					await transaction.RollbackAsync();
+					throw;
+				}
+				finally
+				{
+					await connection.CloseAsync();
+				}
+			}
+		}
 
-                var dynamicParametres = new DynamicParameters(parametres);
+		private int? SingleServiceUsedEdit(SqlConnection connection, DbTransaction transaction, SingleServiceUpdateModel s)
+		{
+			try
+			{
+				var parametres = new Dictionary<string, object?>
+				{
+					{"@pClientOrderID", s.IdOrder },
+					{"@pSingleServiceID", s.SingleServiceId },
+					{"@pCount", s.Count },
+					{"@pPrice", s.Price },
+					{"@pTotalPrice", s.TotalPrice },
+					{"@pDiscountPrice", s.DiscountPrice },
+					{"@pEmployeeOrderID", s.EmployeeOrderId },
+					{"@pSingleServiceResevedID", s.SingleServiceResevedId },
+					{"@pPaid", s.Paid },
+					{"@pPaidPrice", s.PaidPrice },
+					{"@pPaidCount", s.PaidCount },
+					{"@pTerminalID", s.TerminalId },
+					{"@pSingleServiceQueueID", null },
+				};
 
-                var ssuId = connection.Query<int?>("SingleServiceUsedEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure).FirstOrDefault();
+				var dynamicParametres = new DynamicParameters(parametres);
 
-                return ssuId;
-            }
-            catch
-            {
-                throw;
-            }
-        }
+				var ssuId = connection.Query<int?>("SingleServiceUsedEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure).FirstOrDefault();
 
-        private int? CashboxCheckListEdit(SqlConnection connection, DbTransaction transaction, CashboxCheckListEditModel c)
-        {
-            try
-            {
-                var parametres = new Dictionary<string, object>
-                {
-                    {"@pIdOrder", c.IdOrder},
-                    {"@pIdSeasonOrder", c.IdSeasonOrder},
-                    {"@pCashboxPaymentTypeID", c.CashboxPaymentTypeId},
-                    {"@pPrice", c.Price},
-                    {"@pTotalMoney", c.TotalModey},
-                    {"@pTypeSystem", c.TypeSystem},
-                    {"@pIdCashier", c.IdCashier},
-                    {"@pIdMode", c.Mode},
-                    {"@pCashboxID", c.CashboxId},
-                };
+				return ssuId;
+			}
+			catch
+			{
+				throw;
+			}
+		}
 
-                var dynamicParametres = new DynamicParameters(parametres);
-                dynamicParametres.Add("@pIdCheck", null, DbType.Int32, ParameterDirection.InputOutput);
+		private int? CashboxCheckListEdit(SqlConnection connection, DbTransaction transaction, CashboxCheckListEditModel c)
+		{
+			try
+			{
+				var parametres = new Dictionary<string, object?>
+				{
+					{"@pIdOrder", c.IdOrder},
+					{"@pIdSeasonOrder", c.IdSeasonOrder},
+					{"@pCashboxPaymentTypeID", c.CashboxPaymentTypeId},
+					{"@pPrice", c.Price},
+					{"@pTotalMoney", c.TotalModey},
+					{"@pTypeSystem", c.TypeSystem},
+					{"@pIdCashier", c.IdCashier},
+					{"@pIdMode", c.Mode},
+					{"@pCashboxID", c.CashboxId},
+				};
 
-                var result = connection.Query("CashboxCheckListEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure);
+				var dynamicParametres = new DynamicParameters(parametres);
+				dynamicParametres.Add("@pIdCheck", null, DbType.Int32, ParameterDirection.InputOutput);
 
-                int? idCheck = dynamicParametres.Get<int?>("@pIdCheck");
+				var result = connection.Query("CashboxCheckListEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure);
 
-                return idCheck;
-            }
-            catch
-            {
-                throw;
-            }
-        }
+				int? idCheck = dynamicParametres.Get<int?>("@pIdCheck");
 
-        private int? CashboxPaymentEdit(SqlConnection connection, DbTransaction transaction, CashboxPaymentEditModel c)
-        {
-            try
-            {
-                var parametres = new Dictionary<string, object>
-                {
-                    {"@pCashboxPaymentTypeID", c.CashboxPaymentTypeId},
-                    {"@pPrice", c.Price},
-                    {"@pCodeAuthorization", c.CodeAuthorization},
-                    {"@pCodeCard", c.CodeCard},
-                    {"@pIdOrder", c.IdOrder},
-                    {"@pIdSeasonOrder", c.IdSeasonOrder},
-                    {"@pIdCashier", c.IdCashier},
-                    {"@pCashboxID", c.CashboxId},
-                    {"@pCardTypeID", c.CardTypeId},
-                };
+				return idCheck;
+			}
+			catch
+			{
+				throw;
+			}
+		}
 
-                var dynamicParametres = new DynamicParameters(parametres);
-                dynamicParametres.Add("@pIdPayment", null, DbType.Int32, ParameterDirection.InputOutput);
+		private int? CashboxPaymentEdit(SqlConnection connection, DbTransaction transaction, CashboxPaymentEditModel c)
+		{
+			try
+			{
+				var parametres = new Dictionary<string, object?>
+				{
+					{"@pCashboxPaymentTypeID", c.CashboxPaymentTypeId},
+					{"@pPrice", c.Price},
+					{"@pCodeAuthorization", c.CodeAuthorization},
+					{"@pCodeCard", c.CodeCard},
+					{"@pIdOrder", c.IdOrder},
+					{"@pIdSeasonOrder", c.IdSeasonOrder},
+					{"@pIdCashier", c.IdCashier},
+					{"@pCashboxID", c.CashboxId},
+					{"@pCardTypeID", c.CardTypeId},
+				};
 
-                var result = connection.Query("CashboxPaymentEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure);
+				var dynamicParametres = new DynamicParameters(parametres);
+				dynamicParametres.Add("@pIdPayment", null, DbType.Int32, ParameterDirection.InputOutput);
 
-                int? idPayment = dynamicParametres.Get<int?>("@pIdPayment");
+				var result = connection.Query("CashboxPaymentEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure);
 
-                return idPayment;
-            }
-            catch
-            {
-                throw;
-            }
-        }
+				int? idPayment = dynamicParametres.Get<int?>("@pIdPayment");
 
-        private void PaymentHistoryEdit(SqlConnection connection, DbTransaction transaction, PaymentHistoryEditModel p)
-        {
-            try
-            {
-                var parametres = new Dictionary<string, object>
-                {
-                    {"@pMode", p.Mode},
-                    {"@pID", p.Id},
-                    {"@pCheckListID", p.CheckListID},
-                    {"@pCardPaymentID", p.CardPaymentId},
-                    {"@pCashlessPaymentID", p.CashlessPaymentID},
-                    {"@pPaymentTypeID", p.PaymentTypeID},
-                    {"@pCashboxID", p.CashboxID},
-                    {"@pFiscalMode", p.FiscalMode},
-                    {"@pCertificateID", p.CertificateID},
-                    {"@pDiscountID", p.DiscountID},
-                    {"@pMedServReservedID", p.MedServReservedID},
-                    {"@pSingleServiceReservedID", p.SingleServiceReservedID},
-                    {"@pSeasonOrderID", p.SeasonOrderID},
-                    {"@pCertificateReservedID", p.CertificateReservedID},
-                    {"@pJWSMoneyID", p.JWSMoneyID},
-                    {"@pJWSSingleServiceID", p.JWSSingleServiceID},
-                    {"@pCashboxOrderID", p.CashboxOrderID},
-                    {"@pPayCashboxOrderID", p.PayCashboxOrderID},
-                    {"@pSingleServiceUsedID", p.SingleServiceUsedID},
-                    {"@pCount", p.Count},
-                    {"@pPaymentPrice", p.PaymentPrice},
-                    {"@pPrice", p.Price},
-                    {"@pTotalPrice", p.TotalPrice},
-                    {"@pBalanceTopUp", p.BalanceTopUp},
-                    {"@pPaySeasonOrderID", p.PaySeasonOrderID},
-                    {"@pEmployeeID", p.EmployeeID},
-                    {"@pClientID", p.ClientID},
-                    {"@pWriteOff", p.WriteOff},
-                    {"@pRefund", p.Refund},
-                    {"@pCashierID", p.CashierID},
-                };
+				return idPayment;
+			}
+			catch
+			{
+				throw;
+			}
+		}
 
-                var dynamicParametres = new DynamicParameters(parametres);
+		private void PaymentHistoryEdit(SqlConnection connection, DbTransaction transaction, PaymentHistoryEditModel p)
+		{
+			try
+			{
+				var parametres = new Dictionary<string, object?>
+				{
+					{"@pMode", p.Mode},
+					{"@pID", p.Id},
+					{"@pCheckListID", p.CheckListID},
+					{"@pCardPaymentID", p.CardPaymentId},
+					{"@pCashlessPaymentID", p.CashlessPaymentID},
+					{"@pPaymentTypeID", p.PaymentTypeID},
+					{"@pCashboxID", p.CashboxID},
+					{"@pFiscalMode", p.FiscalMode},
+					{"@pCertificateID", p.CertificateID},
+					{"@pDiscountID", p.DiscountID},
+					{"@pMedServReservedID", p.MedServReservedID},
+					{"@pSingleServiceReservedID", p.SingleServiceReservedID},
+					{"@pSeasonOrderID", p.SeasonOrderID},
+					{"@pCertificateReservedID", p.CertificateReservedID},
+					{"@pJWSMoneyID", p.JWSMoneyID},
+					{"@pJWSSingleServiceID", p.JWSSingleServiceID},
+					{"@pCashboxOrderID", p.CashboxOrderID},
+					{"@pPayCashboxOrderID", p.PayCashboxOrderID},
+					{"@pSingleServiceUsedID", p.SingleServiceUsedID},
+					{"@pCount", p.Count},
+					{"@pPaymentPrice", p.PaymentPrice},
+					{"@pPrice", p.Price},
+					{"@pTotalPrice", p.TotalPrice},
+					{"@pBalanceTopUp", p.BalanceTopUp},
+					{"@pPaySeasonOrderID", p.PaySeasonOrderID},
+					{"@pEmployeeID", p.EmployeeID},
+					{"@pClientID", p.ClientID},
+					{"@pWriteOff", p.WriteOff},
+					{"@pRefund", p.Refund},
+					{"@pCashierID", p.CashierID},
+				};
 
-                connection.Query("PaymentHistoryEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure);
-            }
-            catch
-            {
-                throw;
-            }
-        }
+				var dynamicParametres = new DynamicParameters(parametres);
 
-        private int? CashboxOrderEdit(DbTransaction transaction, CashboxOrderEditModel c)
-        {
-            throw new NotImplementedException();
-        }
-    }
+				connection.Query("PaymentHistoryEdit", dynamicParametres, transaction, commandType: CommandType.StoredProcedure);
+			}
+			catch
+			{
+				throw;
+			}
+		}
+		private int? CashboxOrderEdit(DbTransaction transaction, CashboxOrderEditModel c)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
