@@ -14,9 +14,6 @@ namespace WebKassaExchanger
 		public static string sysPath = String.Format(@"{0}\sys.ini", AppDomain.CurrentDomain.BaseDirectory);
 		public static IConfiguration? Configuration;
 
-		/// <summary>
-		///  The main entry point for the application.
-		/// </summary>
 		[STAThread]
 		static void Main()
 		{

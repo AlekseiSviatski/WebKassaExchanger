@@ -14,6 +14,9 @@ using WebKassa.Models.Response.Document;
 
 namespace WebKassa
 {
+	/// <summary>
+	/// LOL
+	/// </summary>
 	public class WebKassaCore : BaseMessaging
 	{
 		private readonly DateTime _baseDate = new DateTime(1970, 1, 1);

@@ -1,52 +1,47 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ApplicationIcon>exchange.ico</ApplicationIcon>
+	<OutputType>WinExe</OutputType>
+	  <TargetFramework>$(TargetFramework)-windows</TargetFramework>
+	<Nullable>enable</Nullable>
+	<UseWindowsForms>true</UseWindowsForms>
+	<PlatformTarget>AnyCPU</PlatformTarget>
+	<ApplicationIcon>exchange.ico</ApplicationIcon>
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="WebKassa\**" />
-    <EmbeddedResource Remove="WebKassa\**" />
-    <None Remove="WebKassa\**" />
+	<Compile Remove="WebKassa\**" />
+	<EmbeddedResource Remove="WebKassa\**" />
+	<None Remove="WebKassa\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove=".gitattributes" />
-    <None Remove=".gitignore" />
+	<Content Include="exchange.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="exchange.ico" />
+	<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+	<PackageReference Include="NLog" Version="5.3.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="NLog" Version="5.3.2" />
+	<ProjectReference Include="WebKassa\WebKassa.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="WebKassa\WebKassa.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="AppConfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="connect.udl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="exchange.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="README.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+	<None Update="AppConfig.json">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
+	<None Update="connect.udl">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
+	<None Update="exchange.ico">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
+	<None Update="README.txt">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
 </Project>
